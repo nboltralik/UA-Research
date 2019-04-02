@@ -23,10 +23,15 @@ Float_t zRecNR,tRecNR,fRecNR;
 Int_t nIterNR = 0;
 Float_t zRecEE,tRecEE,fRecEE;
 Int_t nIterEE = 0;
+TRandom3 *r;
+Float_t qEff;
 
-void minimize(string f) {
+
+void minimize(string f, Float_t q) {
 
   readHistograms();
+  r = new TRandom3(88);
+  qEff = q;
 
    //open event file
    infile.open(f);
@@ -36,7 +41,7 @@ void minimize(string f) {
    }
 
    //--- Open the ROOT output file:
-   TFile *outFile = new TFile ("10EventResults.root","recreate");
+   TFile *outFile = new TFile ("EventResults.root","recreate");
 
    //--- Define the event tree:
    TTree *Event = new TTree ("Event","Event tree info");
@@ -180,6 +185,8 @@ Int_t eventListCreator() {
   Double_t x,y, tPMT, PMT;
   vector<Double_t> tmpVec;
 
+  Int_t hit1 = 0, hit2 = 0;
+
   //throw away junk
   string tmp;
   infile >> tmp;
@@ -201,12 +208,12 @@ Int_t eventListCreator() {
 
   infile >> tmp;  //ignore z
   // printf("---------------------------------\nVertex is (%0.f,%0.f,%0.f)\n", x,y,z);
-  infile>>PMT;
-  infile>>tPMT;
-  tmpVec.push_back(PMT);
-  tmpVec.push_back(tPMT);
-  eventList.push_back(tmpVec);
-  tmpVec.clear();
+  // infile>>PMT;
+  // infile>>tPMT;
+  // tmpVec.push_back(PMT);
+  // tmpVec.push_back(tPMT);
+  // eventList.push_back(tmpVec);
+  // tmpVec.clear();
 
   //read a (PMT,tPMT) pair until there is a read failure (this happens when
     //it attempts to read the "Event/nhS1/vtx(mm):" string into a Double_t)
@@ -218,15 +225,21 @@ Int_t eventListCreator() {
     // printf("%d %0.2f\n", PMT, tPMT);
     infile>>PMT;
     infile>>tPMT;
-    tmpVec.push_back(PMT);
-    tmpVec.push_back(tPMT);
-    eventList.push_back(tmpVec);
-    tmpVec.clear();
+    hit1++;
+    if (r->Uniform() < qEff) {
+      hit2++;
+      tmpVec.push_back(PMT);
+      tmpVec.push_back(tPMT);
+      eventList.push_back(tmpVec);
+      tmpVec.clear();
+    }
   }
   eventList.pop_back();
 
   //Clear failbit
   infile.clear();
+
+  // printf("%d total hits, %d used\n", hit1, hit2);
 
   return 1;
 
