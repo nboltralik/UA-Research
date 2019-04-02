@@ -11,7 +11,9 @@ Make sure your C++ compiler is up to date.
 
 With all the files above in your working directory, run the command:
 
-`root -b -q -x 'minimize.cpp("10_events.ascii")'`
+`root -b -q -x 'minimize.cpp("10_events.ascii", .9)'`
+
+using your event file name and desired quantum efficiency.
 
 It will print the results of each Event under the two hypotheses and give you a TTree containing them.
 
