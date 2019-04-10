@@ -20,9 +20,9 @@ Double_t parValue,parError;
 Float_t zAvg,tAvg, zzMax = 1440, zzMin = 0;
 
 Float_t zRecNR,tRecNR,fRecNR;
-Int_t nIterNR = 0;
+Int_t nIterNR = 0, nHitNR = 0;
 Float_t zRecEE,tRecEE,fRecEE;
-Int_t nIterEE = 0;
+Int_t nIterEE = 0, nHitEE = 0;
 TRandom3 *r;
 Float_t qEff;
 
@@ -50,36 +50,45 @@ void minimize(string f, Float_t q) {
    Event->Branch ( "zRecEE", &zRecEE,"zrec/F");
    Event->Branch ( "tRecEE", &tRecEE,"trec/F");
    Event->Branch ( "fRecEE", &fRecEE,"frec/F");
+   Event->Branch ( "nHitNR", &nHitNR,"nhit/I");
 
    Event->Branch ("nIterNR",&nIterNR,"niter/I");
    Event->Branch ( "zRecNR", &zRecNR,"zrec/F");
    Event->Branch ( "tRecNR", &tRecNR,"trec/F");
    Event->Branch ( "fRecNR", &fRecNR,"frec/F");
+   Event->Branch ( "nHitEE", &nHitNR,"nhit/I");
 
    Int_t status = 0, eventNum = 0;
    status = eventListCreator();
 
+   TStopwatch *myClock = new TStopwatch();
+   myClock->Start();
+
    do {
-     eventNum++;
+      eventNum++;
 
-     minimizeEE();
-     minimizeNR();
+      minimizeEE();
+      minimizeNR();
 
-     printf("\n\t\tEvent #%d\nEE:\n", eventNum);
-     printf("nIter = %d\nz = %.4f\nt = %.4f\nf = %.4f\n", nIterEE,zRecEE,tRecEE,fRecEE);
-     printf("NR:\n");
-     printf("nIter = %d\nz = %.4f\nt = %.4f\nf = %.4f\n", nIterNR,zRecNR,tRecNR,fRecNR);
+      printf("\n\t\tEvent #%d\nEE:\n", eventNum);
+      printf("nIter = %d\nz = %.4f\nt = %.4f\nf = %.4f\nhits = %d\n", nIterEE,zRecEE,tRecEE,fRecEE,nHitEE);
+      printf("NR:\n");
+      printf("nIter = %d\nz = %.4f\nt = %.4f\nf = %.4f\nhits = %d\n", nIterNR,zRecNR,tRecNR,fRecNR,nHitNR);
 
-     Event->Fill();
+      Event->Fill();
 
-     eventList.clear();
-     status = eventListCreator();
-   } while(status != 0);
+      eventList.clear();
+      status = eventListCreator();
+    } while(status != 0);
 
-   infile.close();
+    myClock->Stop();
 
+    infile.close();
     Event->Write();
     outFile->Close();
+
+    printf ("\nTime to generate %d events = %f s\n",eventNum,myClock->CpuTime());
+    printf ("Average time per event = %f s\n",myClock->CpuTime()/eventNum);
 
 }
 
@@ -135,6 +144,7 @@ void minimizeEE() {
     myMinuit->GetParameter (0,parValue,parError); zRecEE = parValue;
     myMinuit->GetParameter (1,parValue,parError); tRecEE = parValue;
     nIterEE = nIterations;
+    nHitEE = eventList.size();
     // cout << "Event #" << eventNum << endl << "  n-iter = " << nIterations << endl << "  z = " << zRec << endl << "  t = " << tRec
     //      << endl << "  f = " << fRec << endl;
 }
@@ -176,6 +186,7 @@ void minimizeNR() {
   myMinuit->GetParameter (0,parValue,parError); zRecNR = parValue;
   myMinuit->GetParameter (1,parValue,parError); tRecNR = parValue;
   nIterNR = nIterations;
+  nHitNR = eventList.size();
   // cout << "Event #" << eventNum << endl << "  n-iter = " << nIterations << endl << "  z = " << zRec << endl << "  t = " << tRec
   //      << endl << "  f = " << fRec << endl;
   }
