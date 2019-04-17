@@ -29,7 +29,13 @@ Float_t qEff;
 
 void minimize(string f, Float_t q) {
 
+  TStopwatch *myClock = new TStopwatch();
+  myClock->Start();
   readHistograms();
+  myClock->Stop();
+  printf("%.2f seconds to read histograms\n", myClock->CpuTime());
+  myClock->Reset();
+
   r = new TRandom3(88);
   qEff = q;
 
@@ -61,8 +67,10 @@ void minimize(string f, Float_t q) {
    Int_t status = 0, eventNum = 0;
    status = eventListCreator();
 
-   TStopwatch *myClock = new TStopwatch();
    myClock->Start();
+
+   evtClock->Start();
+   evtClock->Stop();
 
    do {
       eventNum++;
@@ -87,14 +95,18 @@ void minimize(string f, Float_t q) {
     Event->Write();
     outFile->Close();
 
-    printf ("\nTime to generate %d events = %f s\n",eventNum,myClock->CpuTime());
-    printf ("Average time per event = %f s\n",myClock->CpuTime()/eventNum);
+    printf ("\nTime to generate %d events = %.3f s\n",eventNum,myClock->CpuTime());
+    printf ("Average time per event = %.3f s\n",myClock->CpuTime()/eventNum);
+    printf("Time spend in setup is %.3f\n", evtClock->CpuTime());
 
 }
 
 void min2vtx (Int_t &nPar, Double_t *zGrad, Double_t &fVal, Double_t *par, Int_t iFlag) {
 
+  // evtClock->Continue();
   fVal = eventReader(eventList,par[0],par[1], hyp);
+  // evtClock->Stop();
+
   nIterations++;
 
   // //--- Rescale the functional value and update the number of iterations.
@@ -136,7 +148,11 @@ void minimizeEE() {
   // cout << endl << "-------------------------------------------------------" << endl;
 
   // Perform the minimization
+    // evtClock->Start();
     myMinuit->mnexcm ("SIMPLEX",argList,2,errFlag);
+    // evtClock->Stop();
+    // evtClock->Reset();
+    // printf("EE minimization took %.3f seconds\n", evtClock->CpuTime());
 
   //--- Get the minimization results:
     myMinuit->mnstat (fMin,edm,errDef,nvpar,nparx,icstat);
@@ -178,7 +194,11 @@ void minimizeNR() {
   // cout << endl << "-------------------------------------------------------" << endl;
 
   // Perform the minimization
+  // evtClock->Start();
   myMinuit->mnexcm ("SIMPLEX",argList,2,errFlag);
+  // evtClock->Stop();
+  // evtClock->Reset();
+  // printf("NR minimization took %.3f seconds\n", evtClock->CpuTime());
 
   //--- Get the minimization results:
   myMinuit->mnstat (fMin,edm,errDef,nvpar,nparx,icstat);

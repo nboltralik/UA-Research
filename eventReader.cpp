@@ -22,7 +22,9 @@ Double_t eventReader(vector<vector<Double_t>> eventList, Double_t z, Double_t tE
   hitCount = 0;
 
   //Perform mapping,gets closest points, calculates weights
+  evtClock->Continue();
   setup(x,y,z);
+  evtClock->Stop();
 
   for (size_t q = 1; q < eventList.size(); q++) {
     hitCount++;

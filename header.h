@@ -34,4 +34,7 @@ typedef struct Point
 
 static Point **points;
 
+//TODO - remove this stuff
+TStopwatch *evtClock = new TStopwatch();
+
 #endif
