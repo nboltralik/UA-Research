@@ -13,7 +13,7 @@ With all the files above in your working directory, run the command:
 
 `root -b -q -x 'minimize.cpp("10_events.ascii", "eventResults.root", .9)'`
 
-using your event file name, the desired results file name and quantum efficiency.
+using your event file name, the desired results file name, and quantum efficiency.
 
 It will print the results of each Event under the two hypotheses and give you a TTree containing them.
 
