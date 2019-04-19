@@ -11,11 +11,13 @@ Make sure your C++ compiler is up to date.
 
 With all the files above in your working directory, run the command:
 
-`root -b -q -x 'minimize.cpp("10_events.ascii", .9)'`
+`root -b -q -x 'minimize.cpp("10_events.ascii", "eventResults.root", .9)'`
 
-using your event file name and desired quantum efficiency.
+using your event file name, the desired results file name and quantum efficiency.
 
 It will print the results of each Event under the two hypotheses and give you a TTree containing them.
 
 #### Notice
-Last updated 4/2/19.  If this README isn't among the latest commit then there's no guarantee the program will work as described above.
+Last updated 4/19/19.  If this README isn't among the latest commit then there's no guarantee the program will work as described above.
+
+Currently works as described but without printing the results of each event
