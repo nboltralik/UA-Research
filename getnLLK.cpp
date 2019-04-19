@@ -76,38 +76,53 @@ Double_t getnLLK(Double_t x, Double_t y, Double_t z, Double_t tEvent, Int_t PMTN
 }
 
 void setup(Double_t x, Double_t y, Double_t z) {
-
   // printf("setup called at (%0.f,%0.f,%0.f)\n", x,y,z);
 
+  // evtClock->Start();
+  //Only do this once
+  // if (calledOnce == false) {
+  //   //Read all of the PMT coords into memory
+  //   PMTCoords = readGeometryFile();           //From mapping.cpp
+  //   // for (size_t i = 0; i < NUM_PMT; i++) {
+  //   //   printf("PMTCoords[%zu][0] = %0.f\n", i,PMTCoords[i][0]);
+  //   // }
+  //   calledOnce = true;
+  //   // readHistograms();
+  // }
+  // evtClock->Stop();
+  // timeElapsed += evtClock->CpuTime();
+  // evtClock->Reset();
+
+  // evtClock->Start();
   //Create the mapping
-  PMTMap = mapping(x,y,z);                  //From mapping.cpp
+  // PMTMap = mapping(x,y);                  //From mapping.cpp
   // for (size_t i = 0; i < NUM_PMT; i++) {
   //   cout << PMTMap[i][0] << " -> " << PMTMap[i][1] << endl;
   // }
+  // evtClock->Stop();
+  // timeElapsed += evtClock->CpuTime();
+  // evtClock->Reset();
 
+  // evtClock->Start();
   //Find closest 4 pairs of (y,z) points
   points = getPoints(x,y,z);
   // cout << "Closest Points:" << endl;
   // for (size_t i = 0; i < 4; i++) {
   //   cout << "(" << points[i]->y << ", " << points[i]->z << ")" << endl;
   // }
+  // evtClock->Stop();
+  // timeElapsed += evtClock->CpuTime();
+  // evtClock->Reset();
 
+  // evtClock->Start();
   weights = calcWeights(points,x,y,z);
   // cout << "Weights:" << endl;
   // for (size_t i = 0; i < 4; i++) {
   //   cout << weights[i] << endl;
   // }
-
-  //Only do this once
-  if (calledOnce == false) {
-    //Read all of the PMT coords into memory
-    PMTCoords = readGeometryFile();           //From mapping.cpp
-    // for (size_t i = 0; i < NUM_PMT; i++) {
-    //   printf("PMTCoords[%zu][0] = %0.f\n", i,PMTCoords[i][0]);
-    // }
-    // calledOnce = true;
-    // readHistograms();
-  }
+  // evtClock->Stop();
+  // timeElapsed += evtClock->CpuTime();
+  // evtClock->Reset();
 
 }
 //Reads all of the histograms into memory

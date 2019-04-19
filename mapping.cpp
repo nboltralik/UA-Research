@@ -14,16 +14,18 @@
 //Reads the file into a Double_t[494][5] array containing PMT Number, R, ANG, x, y
 Double_t** readGeometryFile();
 //Returns a mapping of each PMT to the closest PMT after rotating
-Int_t** createMapping(Double_t**, Double_t);
+Int_t** createMapping(Double_t);
 //Calculates the distance between two points given in polar coords
 Double_t polarDistance(Double_t, Double_t, Double_t, Double_t);
 //Loops through the PMTArray to find the closest PMT to the given polar coords
-Int_t findClosest(Double_t**, Double_t, Double_t, Int_t);
+Int_t findClosest(Double_t, Double_t, Int_t);
 
 //Main function
-Int_t** mapping(Double_t x, Double_t y, Double_t z) {
+Int_t** mapping(Double_t x, Double_t y) {
 
-  Double_t **PMTArray = readGeometryFile();
+  mappingCount++;
+
+  // Double_t **PMTArray = readGeometryFile();
   Double_t rho = pow((x*x + y*y), 0.5);
   Double_t theta = acos(y/rho) * 180/PI;
   //If x > 0 then we need a counter-clockwise rotation
@@ -36,7 +38,7 @@ Int_t** mapping(Double_t x, Double_t y, Double_t z) {
   //   printf("%zu: %.2f, %.2f, %.2f\n", i, PMTArray[i][0], PMTArray[i][1], PMTArray[i][2]);
   // }
 
-  Int_t** map = createMapping(PMTArray, theta);
+  Int_t** map = createMapping(theta);
 
   // for (size_t i = 0; i < NUM_PMT; i++) {
   //   printf("%d\t->\t%d\n", map[i][0], map[i][1]);
@@ -49,7 +51,7 @@ Int_t** mapping(Double_t x, Double_t y, Double_t z) {
 }
 
 //Takes the array of PMTs and the angle theta to shift them by
-Int_t** createMapping(Double_t** PMTArray, Double_t theta) {
+Int_t** createMapping(Double_t theta) {
 
   //Alocate memory for a 2D Int_t array
   Int_t **map = new Int_t*[NUM_PMT];
@@ -57,29 +59,33 @@ Int_t** createMapping(Double_t** PMTArray, Double_t theta) {
     map[i] = new Int_t[2];
   }
 
+  // evtClock->Start();
   //Loop through the PMTs
   for (Int_t i = 0; i < NUM_PMT; i++) {
     //First column of map is original PMT number
-    map[i][0] = PMTArray[i][0];
+    map[i][0] = PMTCoords[i][0];
     //Second column is new PMT number after rotation.
     if (i < NUM_TOP_PMT) {
       //Pass 0 as pos if the PMT is in the top array
-      map[i][1] = findClosest(PMTArray, PMTArray[i][1], PMTArray[i][2]+theta, 0);
+      map[i][1] = findClosest(PMTCoords[i][1], PMTCoords[i][2]+theta, 0);
     } else {
       //Else pass 1 for bottom PMTs
-      map[i][1] = findClosest(PMTArray, PMTArray[i][1], PMTArray[i][2]-theta, 1);
+      map[i][1] = findClosest(PMTCoords[i][1], PMTCoords[i][2]-theta, 1);
     }
   }
+  // evtClock->Stop();
+  // timeElapsed += evtClock->CpuTime();
+  // evtClock->Reset();
 
   //Find closest to PMT 234.  Using test point #1 this should be PMT 241
-  // printf("Closest is: %d\n", findClosest(PMTArray, 733, 221.75+theta));
+  // printf("Closest is: %d\n", findClosest(PMTCoords, 733, 221.75+theta));
 
   return map;
 }
 
 //Given the array of PMTs, a given polar coordinate, and an Int_t indicating a top
 //or bottom PMT, returns the PMT number of the closest PMT
-Int_t findClosest(Double_t** PMTArray, Double_t rho, Double_t theta, Int_t pos) {
+Int_t findClosest(Double_t rho, Double_t theta, Int_t pos) {
 
   Double_t dist, min;
   Int_t PMT;
@@ -87,18 +93,18 @@ Int_t findClosest(Double_t** PMTArray, Double_t rho, Double_t theta, Int_t pos) 
   //If the coords for the given PMT are on top then:
   if (pos == 0) {
     //Set minimum distance to first PMT in list (PMT 0)
-    min = polarDistance(PMTArray[0][1], PMTArray[0][2], rho, theta);
+    min = polarDistance(PMTCoords[0][1], PMTCoords[0][2], rho, theta);
     PMT = 0;
 
     //Loop through all top PMTs
     for (size_t i = 1; i < NUM_TOP_PMT; i++) {
       //Calculate to distance between the two PMTs
-      dist = polarDistance(PMTArray[i][1], PMTArray[i][2], rho, theta);
-      // printf("Distance between PMT# %.0f at %.2f, %.2f and %.2f, %.2f is: %.2f\n", PMTArray[i][0], PMTArray[i][1], PMTArray[i][2], rho, theta, dist);
+      dist = polarDistance(PMTCoords[i][1], PMTCoords[i][2], rho, theta);
+      // printf("Distance between PMT# %.0f at %.2f, %.2f and %.2f, %.2f is: %.2f\n", PMTCoords[i][0], PMTCoords[i][1], PMTCoords[i][2], rho, theta, dist);
 
       //If this is less than the previous minimum distance then change the minimum
       if (dist < min) {
-        PMT = (Int_t)PMTArray[i][0];
+        PMT = (Int_t)PMTCoords[i][0];
         min = dist;
       }
     }
@@ -106,13 +112,13 @@ Int_t findClosest(Double_t** PMTArray, Double_t rho, Double_t theta, Int_t pos) 
 
   //Same steps as above but for bottom PMTs (#'s 300-540)
   } else {
-    min = polarDistance(PMTArray[NUM_TOP_PMT][1], PMTArray[NUM_TOP_PMT][2], rho, theta);
+    min = polarDistance(PMTCoords[NUM_TOP_PMT][1], PMTCoords[NUM_TOP_PMT][2], rho, theta);
     PMT = 300;
     for (size_t i = NUM_TOP_PMT; i < NUM_PMT; i++) {
-      dist = polarDistance(PMTArray[i][1], PMTArray[i][2], rho, theta);
-      // printf("Distance between PMT# %.0f at %.2f, %.2f and %.2f, %.2f is: %.2f\n", PMTArray[i][0], PMTArray[i][1], PMTArray[i][2], rho, theta, dist);
+      dist = polarDistance(PMTCoords[i][1], PMTCoords[i][2], rho, theta);
+      // printf("Distance between PMT# %.0f at %.2f, %.2f and %.2f, %.2f is: %.2f\n", PMTCoords[i][0], PMTCoords[i][1], PMTCoords[i][2], rho, theta, dist);
       if (dist < min) {
-        PMT = (Int_t)PMTArray[i][0];
+        PMT = (Int_t)PMTCoords[i][0];
         min = dist;
       }
     }

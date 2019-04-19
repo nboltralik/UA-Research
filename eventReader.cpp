@@ -22,9 +22,11 @@ Double_t eventReader(vector<vector<Double_t>> eventList, Double_t z, Double_t tE
   hitCount = 0;
 
   //Perform mapping,gets closest points, calculates weights
-  evtClock->Continue();
+  // evtClock->Start();
   setup(x,y,z);
-  evtClock->Stop();
+  // evtClock->Stop();
+  // timeElapsed += evtClock->CpuTime();
+  // evtClock->Reset();
 
   for (size_t q = 1; q < eventList.size(); q++) {
     hitCount++;
@@ -62,7 +64,12 @@ Double_t eventReader(vector<vector<Double_t>> eventList, Double_t z, Double_t tE
     // printf("tCorrected = %f\n",tCorrected);
 
     //Pass t corrected and PMt to getnLLK() and sum the returns
+    // evtClock->Start();
     eventLikelihood += getnLLK(x,y,z,tCorrected,PMT,hyp);
+    // evtClock->Stop();
+    // timeElapsed += evtClock->CpuTime();
+    // evtClock->Reset();
+
   }
 
     //Normalize by dividing sum by number of hits, answer should be between 2 and 11

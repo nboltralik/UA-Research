@@ -36,5 +36,7 @@ static Point **points;
 
 //TODO - remove this stuff
 TStopwatch *evtClock = new TStopwatch();
+Double_t timeElapsed = 0;
+static Int_t mappingCount = 0;
 
 #endif

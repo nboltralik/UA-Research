@@ -65,23 +65,30 @@ void minimize(string f, Float_t q) {
    Event->Branch ( "nHitEE", &nHitNR,"nhit/I");
 
    Int_t status = 0, eventNum = 0;
+   Double_t x,y;
    status = eventListCreator();
 
    myClock->Start();
 
-   evtClock->Start();
-   evtClock->Stop();
+   // evtClock->Start();
+   // evtClock->Stop();
+
+   PMTCoords = readGeometryFile();
 
    do {
       eventNum++;
 
+      x = eventList[0][0];
+      y = eventList[0][1];
+      PMTMap = mapping(x,y);
+
       minimizeEE();
       minimizeNR();
 
-      printf("\n\t\tEvent #%d\nEE:\n", eventNum);
-      printf("nIter = %d\nz = %.4f\nt = %.4f\nf = %.4f\nhits = %d\n", nIterEE,zRecEE,tRecEE,fRecEE,nHitEE);
-      printf("NR:\n");
-      printf("nIter = %d\nz = %.4f\nt = %.4f\nf = %.4f\nhits = %d\n", nIterNR,zRecNR,tRecNR,fRecNR,nHitNR);
+      // printf("\n\t\tEvent #%d\nEE:\n", eventNum);
+      // printf("nIter = %d\nz = %.4f\nt = %.4f\nf = %.4f\nhits = %d\n", nIterEE,zRecEE,tRecEE,fRecEE,nHitEE);
+      // printf("NR:\n");
+      // printf("nIter = %d\nz = %.4f\nt = %.4f\nf = %.4f\nhits = %d\n", nIterNR,zRecNR,tRecNR,fRecNR,nHitNR);
 
       Event->Fill();
 
@@ -97,7 +104,8 @@ void minimize(string f, Float_t q) {
 
     printf ("\nTime to generate %d events = %.3f s\n",eventNum,myClock->CpuTime());
     printf ("Average time per event = %.3f s\n",myClock->CpuTime()/eventNum);
-    printf("Time spend in setup is %.3f\n", evtClock->CpuTime());
+    // printf("Time spent in evtClock is %f\n", timeElapsed);
+    // printf("Avg time per mapping is %f\n", timeElapsed/mappingCount);
 
 }
 
