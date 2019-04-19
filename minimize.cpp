@@ -27,7 +27,7 @@ TRandom3 *r;
 Float_t qEff;
 
 
-void minimize(string f, Float_t q) {
+void minimize(string f, string out, Float_t q) {
 
   TStopwatch *myClock = new TStopwatch();
   myClock->Start();
@@ -47,7 +47,7 @@ void minimize(string f, Float_t q) {
    }
 
    //--- Open the ROOT output file:
-   TFile *outFile = new TFile ("EventResults.root","recreate");
+   TFile *outFile = new TFile (out.c_str(),"recreate");
 
    //--- Define the event tree:
    TTree *Event = new TTree ("Event","Event tree info");
