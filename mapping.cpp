@@ -7,9 +7,15 @@
 #define NUM_TOP_PMT 253
 #define PI 3.141592653589793
 
+/*
+  This program creates a 2D Int_t array containing a mapping from PMT numbers
+  to their closest PMT after a rotation of theta degrees
+  Currently accounts for 97% of the time spent executing the whole entire program
+*/
+
 //TODO
 //Why does theta need to be subtracted for the bottom PMTs?
-//Make PMTArray global, maybe also rho, theta, map?
+//Simplify this so that it doesn't take so long
 
 //Reads the file into a Double_t[494][5] array containing PMT Number, R, ANG, x, y
 Double_t** readGeometryFile();
@@ -50,7 +56,7 @@ Int_t** mapping(Double_t x, Double_t y) {
 
 }
 
-//Takes the array of PMTs and the angle theta to shift them by
+//Loops through every PMT, calling findClosest to get its closest PMT after rotation
 Int_t** createMapping(Double_t theta) {
 
   //Alocate memory for a 2D Int_t array
@@ -76,9 +82,6 @@ Int_t** createMapping(Double_t theta) {
   // evtClock->Stop();
   // timeElapsed += evtClock->CpuTime();
   // evtClock->Reset();
-
-  //Find closest to PMT 234.  Using test point #1 this should be PMT 241
-  // printf("Closest is: %d\n", findClosest(PMTCoords, 733, 221.75+theta));
 
   return map;
 }

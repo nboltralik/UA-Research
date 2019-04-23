@@ -50,25 +50,6 @@ Double_t* findNearestPoints(Double_t pos, Double_t arr[], Int_t length) {
   returnVal[0] = -1;
   returnVal[1] = -1;
 
-  // if (pos > arr[length-1]) {
-  //   returnVal[0] = length-1;
-  //   returnVal[1] = length-2;
-  //   return returnVal;
-  // }
-  //
-  // while (i<length && pos > arr[i]) {
-  //   // printf("i=%d arr[i]=%.1f\n", i, arr[i]);
-  //   i++;
-  // }
-  //
-  // if (i == 0) {
-  //   returnVal[0] = i;
-  //   returnVal[1] = i+1;
-  // } else {
-  //   returnVal[0] = i-1;
-  //   returnVal[1] = i;
-  // }
-
   if (pos > arr[length-1]) {
     returnVal[0] = arr[length-1];
     returnVal[1] = arr[length-2];

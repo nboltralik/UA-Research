@@ -1,14 +1,23 @@
 #include "header.h"
 #include "eventReader.cpp"
 
+/*
+  This is the main file of the program.  The function minimize should be called
+  with the name of the event file to read, the desired name of the output file,
+  and the desired quantum efficiency (.3 for NR and .2158 for EE).
+*/
+
 void min2vtx (Int_t &nPar, Double_t *zGrad, Double_t &fVal, Double_t *par, Int_t iFlag);
 Int_t eventListCreator();
 void minimizeEE();
 void minimizeNR();
 
+//Program vars
 vector<vector<Double_t>> eventList;
 ifstream infile;
 Int_t hyp, nIterations;
+TRandom3 *r;
+Float_t qEff;
 
 //Minuit vars
 TMinuit *myMinuit;
@@ -19,25 +28,22 @@ Int_t nvpar,nparx,icstat;
 Double_t parValue,parError;
 Float_t zAvg,tAvg, zzMax = 1440, zzMin = 0;
 
+//TTree vars
 Float_t zRecNR,tRecNR,fRecNR;
 Int_t nIterNR = 0, nHitNR = 0;
 Float_t zRecEE,tRecEE,fRecEE;
 Int_t nIterEE = 0, nHitEE = 0;
-TRandom3 *r;
-Float_t qEff;
 
-
+//Main function
 void minimize(string f, string out, Float_t q) {
 
+  //Stopwatch to keep track of time to read histograms
   TStopwatch *myClock = new TStopwatch();
   myClock->Start();
   readHistograms();
   myClock->Stop();
   printf("%.2f seconds to read histograms\n", myClock->CpuTime());
   myClock->Reset();
-
-  r = new TRandom3(88);
-  qEff = q;
 
    //open event file
    infile.open(f);
@@ -66,22 +72,27 @@ void minimize(string f, string out, Float_t q) {
 
    Int_t status = 0, eventNum = 0;
    Double_t x,y;
+
+   r = new TRandom3(88);
+   qEff = q;
+
+   //Status keeps track of whether there are more events in the file
    status = eventListCreator();
 
    myClock->Start();
 
-   // evtClock->Start();
-   // evtClock->Stop();
-
+   //Read the geometry file to PMTCoords so mapping can occur
    PMTCoords = readGeometryFile();
 
    do {
       eventNum++;
 
+      //get x and y coords so mapping can occur
       x = eventList[0][0];
       y = eventList[0][1];
       PMTMap = mapping(x,y);
 
+      //Perform Minuit minimization using both EE and NR histograms
       minimizeEE();
       minimizeNR();
 
@@ -90,8 +101,10 @@ void minimize(string f, string out, Float_t q) {
       // printf("NR:\n");
       // printf("nIter = %d\nz = %.4f\nt = %.4f\nf = %.4f\nhits = %d\n", nIterNR,zRecNR,tRecNR,fRecNR,nHitNR);
 
+      //Fill the TTree
       Event->Fill();
 
+      //Clear the dynamic array then fill it with the next event
       eventList.clear();
       status = eventListCreator();
     } while(status != 0);
@@ -109,12 +122,10 @@ void minimize(string f, string out, Float_t q) {
 
 }
 
+//Used by Minuit to perform the minimization
 void min2vtx (Int_t &nPar, Double_t *zGrad, Double_t &fVal, Double_t *par, Int_t iFlag) {
 
-  // evtClock->Continue();
   fVal = eventReader(eventList,par[0],par[1], hyp);
-  // evtClock->Stop();
-
   nIterations++;
 
   // //--- Rescale the functional value and update the number of iterations.
@@ -219,12 +230,15 @@ void minimizeNR() {
   //      << endl << "  f = " << fRec << endl;
   }
 
+//Reads from the event file one event at a time into a dynamic array and returns
+//1 if there are events remaining, 0 otherwise.
+//Stores the x and y of an event in the first row
 Int_t eventListCreator() {
 
   Double_t x,y, tPMT, PMT;
-  vector<Double_t> tmpVec;
 
-  Int_t hit1 = 0, hit2 = 0;
+  //2D array of doubles
+  vector<Double_t> tmpVec;
 
   //throw away junk
   string tmp;
@@ -247,12 +261,6 @@ Int_t eventListCreator() {
 
   infile >> tmp;  //ignore z
   // printf("---------------------------------\nVertex is (%0.f,%0.f,%0.f)\n", x,y,z);
-  // infile>>PMT;
-  // infile>>tPMT;
-  // tmpVec.push_back(PMT);
-  // tmpVec.push_back(tPMT);
-  // eventList.push_back(tmpVec);
-  // tmpVec.clear();
 
   //read a (PMT,tPMT) pair until there is a read failure (this happens when
     //it attempts to read the "Event/nhS1/vtx(mm):" string into a Double_t)
@@ -264,9 +272,9 @@ Int_t eventListCreator() {
     // printf("%d %0.2f\n", PMT, tPMT);
     infile>>PMT;
     infile>>tPMT;
-    hit1++;
+
+    //Only use the PMT hit if a randomly generated number is below the quantum efficiency
     if (r->Uniform() < qEff) {
-      hit2++;
       tmpVec.push_back(PMT);
       tmpVec.push_back(tPMT);
       eventList.push_back(tmpVec);
@@ -278,15 +286,13 @@ Int_t eventListCreator() {
   //Clear failbit
   infile.clear();
 
-  // printf("%d total hits, %d used\n", hit1, hit2);
-
   return 1;
 
 }
 
 
 //--------------------------------------------------
-//Code below is for grid search minimization
+//Code below is for grid search minimization, currently unused
 
 //TODO - remove
 // #include <chrono>

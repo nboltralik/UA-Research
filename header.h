@@ -5,6 +5,8 @@
 #define NUM_Z 7
 #define NUM_Y 4
 #define GEOMETRY_FILE "LZ_geometry.dump_icd"
+#define EE_HISTO_FILE "EE_out.root"
+#define NR_HISTO_FILE "NR_out.root"
 
 using namespace std;
 
