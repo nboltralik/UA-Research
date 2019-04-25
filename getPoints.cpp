@@ -4,7 +4,7 @@ Double_t* findNearestPoints(Double_t, Double_t[], Int_t);
 Int_t convertPointToIndex(Double_t);
 
 /*
-  Main function, takes the coordinates of an event and returns the weights.
+  Main function, takes the coordinates of an event and returns the closest points
 */
 Point** getPoints(Double_t x, Double_t y, Double_t z){
 

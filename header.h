@@ -10,6 +10,16 @@
 
 using namespace std;
 
+//Struct to hold all the info associated with a pair of y,z coords
+typedef struct Point
+{
+  Int_t y;        //holds an actual y value like 220
+  Int_t z;
+  Int_t yIndex;   //holds the index of that y value in yPoints e.g. 1 for y=220
+  Int_t zIndex;
+} Point;
+
+static Point **points;
 static Int_t** PMTMap;
 static Double_t** PMTCoords;
 static Double_t *weights;
@@ -24,17 +34,6 @@ Double_t yPoints[NUM_Y] = {0, 220, 440, 660};
 string yVals[] = {"r00_", "r22_", "r44_", "r66_"};
 string zVals[] = {"z0001", "z0242", "z0484", "z0726", "z0968", "z1210", "z1440"};
 string type[] = {"EE_", "NR_"};
-
-//Struct to hold all the info associated with a pair of y,z coords
-typedef struct Point
-{
-  Int_t y;
-  Int_t z;
-  Int_t yIndex;
-  Int_t zIndex;
-} Point;
-
-static Point **points;
 
 //TODO - remove this stuff
 TStopwatch *evtClock = new TStopwatch();
