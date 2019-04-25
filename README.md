@@ -25,7 +25,7 @@ A root file will be generated containing a TTree with the results.
 * getPoints.cpp - Returns the closest lookup points to the event vertex
 * calcWeights.cpp - Calculates the weights for each point
 
-###### storeFits.cpp
+##### storeFits.cpp
 This file is not used by the main program but exist to generate the EE_out.root and NR_out.root files.  It looks in a Data/Histograms folder for a root file corresponding to each lookup point and in Data/Params for a corresponding fit parameter file
 
 #### Notice
